@@ -11,7 +11,7 @@ import busio
 from adafruit_pca9685 import PCA9685
 import random
 import math
-from adafruit_motor import servo
+from adafruit_motor import servo 
 
 ############################################
 # Shared I2C bus
