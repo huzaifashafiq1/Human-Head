@@ -103,10 +103,10 @@ def sweep_servo(channel, speed=0.1):
         print("Invalid channel")
         return
     try:
-        for angle in range(0, 181, 5):
+        for angle in range(0, 60, 5):
             servos[channel].angle = angle
             time.sleep(speed)
-        for angle in range(180, -1, -5):
+        for angle in range(59, -1, -5):
             servos[channel].angle = angle
             time.sleep(speed)
     except Exception as e:
@@ -125,15 +125,12 @@ if __name__ == "__main__":
     # Center servos at start
     center_all_servos()
 
+    # Start sweeping only servo 10 in background
+    threading.Thread(target=sweep_servo, args=(10,), daemon=True).start()
+
     # Setup live plot in MAIN thread
     plt.ion()
     fig = plt.figure(figsize=(10, 6))
-
-    print("\n=== SERVO CONTROL ===")
-    print("Commands:")
-    print("- 8, 9, 10, 11 : Sweep that channel")
-    print("- center : Move all servos to center (90°)")
-    print("- quit : Stop program\n")
 
     try:
         while running:
@@ -152,23 +149,10 @@ if __name__ == "__main__":
                 plt.draw()
             plt.pause(0.05)
 
-            # --- Handle user input ---
-            if not plt.fignum_exists(fig.number):  # close plot to quit
+            # --- Exit if plot is closed ---
+            if not plt.fignum_exists(fig.number):
                 running = False
                 break
-
-            if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
-                cmd = input("Enter command: ").strip().lower()
-                if cmd == "center":
-                    center_all_servos()
-                elif cmd in ['8','9','10','11']:
-                    threading.Thread(
-                        target=sweep_servo, args=(int(cmd),), daemon=True
-                    ).start()
-                elif cmd == "quit":
-                    running = False
-                else:
-                    print("Invalid command")
 
     except KeyboardInterrupt:
         running = False
